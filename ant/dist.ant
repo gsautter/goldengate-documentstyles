@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+	Does all the packing. That is, creates the files that live in dist
+-->
+
+<project name="dist">
+	<!--target name="plugins" depends="annotationsjar,attributesjar,basicimageeditjar,navigationjar,blockocr,ocrcheck,regionsjar,textjar,textblocksjar,textstreamsjar,docerrorsjar,docmeatdatajar,docstructurejar,captioncitationjar,fontsjar,urldroplinkerjar,tablesjar,objectlistjar,dpimtoolsjar,xmlviewerjar,docstyleprovjar,docstylemanjar" /-->
+	<target name="jars" depends="dsscomponentjar,dssservletjar,dssmoduljar,docstyleutiljar,docstyleprovjar,docstylemanjar" />
+	
+	<target name="dsscomponentjar">
+		<delete file="${jar.dss.component}" />
+		<jar destfile="${jar.dss.component}" manifest="${file.home}/MANIFEST.components.MF">
+			<fileset dir="${build.home}/classes">
+				<include name="**/goldenGateServer/dss/*.class" />
+				<include name="**/goldenGateServer/dss/data/DssDocumentStyleList*.class" />
+			</fileset>
+			<fileset dir="${src.home}">
+				<include name="**/goldenGateServer/dss/*.java" />
+				<include name="**/goldenGateServer/dss/data/DssDocumentStyleList.java" />
+			</fileset>
+			<fileset dir="." includes="LICENSE.txt"/>
+		</jar>
+	</target>
+	
+	<target name="dssservletjar">
+		<delete file="${jar.dss.client}" />
+		<jar destfile="${jar.dss.client}" manifest="${file.home}/MANIFEST.components.MF">
+			<fileset dir="${build.home}/classes">
+				<include name="**/goldenGateServer/dss/GoldenGateDcsConstants*.class" />
+				<include name="**/goldenGateServer/dss/client/GoldenGateDocumentStyleServlet*.class" />
+				<include name="**/goldenGateServer/dss/data/DssDocumentStyleList*.class" />
+			</fileset>
+			<fileset dir="${src.home}">
+				<include name="**/goldenGateServer/dss/GoldenGateDcsConstants.java" />
+				<include name="**/goldenGateServer/dss/client/GoldenGateDocumentStyleServlet.java" />
+				<include name="**/goldenGateServer/dss/data/DssDocumentStyleList.java" />
+			</fileset>
+			<fileset dir="." includes="LICENSE.txt"/>
+		</jar>
+	</target>
+	
+	<target name="dssmoduljar">
+		<delete file="${jar.dss.modul}" />
+		<jar destfile="${jar.dss.modul}" manifest="${file.home}/MANIFEST.components.MF">
+			<fileset dir="${build.home}/classes">
+				<include name="**/goldenGateServer/dss/GoldenGateDssConstants*.class" />
+				<include name="**/goldenGateServer/dss/client/GoldenGateDssClient*.class" />
+				<include name="**/goldenGateServer/dss/client/DocumentStyleManagerModul*.class" />
+				<include name="**/goldenGateServer/dss/data/DssDocumentStyleList*.class" />
+			</fileset>
+			<fileset dir="${src.home}">
+				<include name="**/goldenGateServer/dss/GoldenGateDssConstants.java" />
+				<include name="**/goldenGateServer/dss/client/GoldenGateDssClient.java" />
+				<include name="**/goldenGateServer/dss/client/DocumentStyleManagerModul.java" />
+				<include name="**/goldenGateServer/dss/data/DssDocumentStyleList.java" />
+			</fileset>
+			<fileset dir="." includes="LICENSE.txt"/>
+		</jar>
+	</target>
+	
+	<target name="docstyleutiljar">
+		<delete file="${jar.docstyleutils}" />
+		<jar destfile="${jar.docstyleutils}" manifest="${file.home}/MANIFEST.plugins.MF">
+			<fileset dir="${build.home}/classes">
+				<include name="**/docStyles/plugins/AbstractDocumentStyleManager.class" />
+				<include name="**/docStyles/plugins/AbstractDocumentStyleManager$*.class" />
+				<include name="**/docStyles/plugins/AbstractDocumentStyleProvider.class" />
+				<include name="**/docStyles/plugins/AbstractDocumentStyleProvider$*.class" />
+				<include name="**/docStyles/util/SettingsDocumentStyle.class" />
+				<include name="**/docStyles/util/SettingsDocumentStyleData.class" />
+				<include name="**/goldenGateServer/dss/GoldenGateDssConstants*.class" />
+				<include name="**/goldenGateServer/dss/client/GoldenGateDssClient*.class" />
+				<include name="**/goldenGateServer/dss/data/DssDocumentStyleList*.class" />
+			</fileset>
+			<fileset dir="${src.home}">
+				<include name="**/docStyles/plugins/AbstractDocumentStyleManager.java" />
+				<include name="**/docStyles/plugins/AbstractDocumentStyleProvider.java" />
+				<include name="**/docStyles/util/SettingsDocumentStyle.java" />
+				<include name="**/docStyles/util/SettingsDocumentStyleData.java" />
+				<include name="**/goldenGateServer/dss/GoldenGateDssConstants*.java" />
+				<include name="**/goldenGateServer/dss/client/GoldenGateDssClient*.java" />
+				<include name="**/goldenGateServer/dss/data/DssDocumentStyleList*.java" />
+			</fileset>
+			<fileset dir="." includes="LICENSE.txt"/>
+		</jar>
+	</target>
+	
+	<target name="docstyleprovjar">
+		<delete file="${jar.docstyleprov}" />
+		<jar destfile="${jar.docstyleprov}" manifest="${file.home}/MANIFEST.plugins.MF">
+			<fileset dir="${build.home}/classes">
+				<!--
+				<include name="**/docStyles/plugins/editor/DocumentStyleProvider.class" />
+				<include name="**/docStyles/plugins/editor/DocumentStyleProvider$*.class" />
+				-->
+				<include name="**/docStyles/plugins/imagine/ImDocumentStyleProvider.class" />
+				<include name="**/docStyles/plugins/imagine/ImDocumentStyleProvider$*.class" />
+			</fileset>
+			<fileset dir="${src.home}">
+				<!--
+				<include name="**/docStyles/plugins/editor/DocumentStyleProvider.java" />
+				-->
+				<include name="**/docStyles/plugins/imagine/ImDocumentStyleProvider.java" />
+			</fileset>
+			<fileset dir="." includes="LICENSE.txt"/>
+		</jar>
+	</target>
+	
+	<target name="docstylemanjar">
+		<delete file="${jar.docstyleman}" />
+		<jar destfile="${jar.docstyleman}" manifest="${file.home}/MANIFEST.plugins.MF">
+			<fileset dir="${build.home}/classes">
+				<!--
+				<include name="**/docStyles/plugins/editor/DocumentStyleManager.class" />
+				<include name="**/docStyles/plugins/editor/DocumentStyleManager$*.class" />
+				-->
+				<include name="**/docStyles/plugins/imagine/ImDocumentStyleManager.class" />
+				<include name="**/docStyles/plugins/imagine/ImDocumentStyleManager$*.class" />
+			</fileset>
+			<fileset dir="${src.home}">
+				<!--
+				<include name="**/docStyles/plugins/DocumentStyleManager.paramTree.*.png" />
+				<include name="**/docStyles/plugins/editor/DocumentStyleManager.java" />
+				<include name="**/docStyles/plugins/editor/DocumentStyleManager.paramTree.*.png" />
+				-->
+				<include name="**/docStyles/plugins/imagine/ImDocumentStyleManager.java" />
+				<include name="**/docStyles/plugins/imagine/ImDocumentStyleManager.checkBox.*.png" />
+				<include name="**/docStyles/plugins/imagine/ImDocumentStyleManager.paramTree.*.png" />
+			</fileset>
+			<fileset dir="." includes="LICENSE.txt"/>
+		</jar>
+	</target>
+</project>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+	Handles the compilation step itself. Especially the classpath is set up
+	here.
+-->
+
+<project name="javac">
+	
+	<!-- set up the classpath for compilation, this should always match the
+	     Eclipse configuration. -->
+	<path id="compile.classpath">
+		<!-- include all .jar in the lib/ directory -->
+	    <fileset dir="${lib.home}">
+	        <include name="*.jar" />
+	    </fileset>
+		<!-- include servlet API .jar -->
+	    <fileset dir="tomcatLib">
+	        <include name="*.jar" />
+	    </fileset>
+	</path>
+	
+	<!-- The task off all tasks -->
+	<target name="compile" depends="compileSvr,compileGge,compileGgi,compileWeb" description="Compile GoldenGATE Server Java sources">
+		<!-- only proxy for three compile tasks -->
+	</target>
+	
+	<!-- Compile backend server core and components -->
+	<target name="compileSvr" description="Compile GoldenGATE Server backend Java sources">
+		
+	    <!-- Compile Java classes as necessary -->
+	    <javac destdir="${build.home}/classes" includeantruntime="false" target="1.5" debug="true" debuglevel="lines,vars,source">
+	    	<src path="${src.home}" />
+    		<include name="**/goldenGateServer/dss/*.java" />
+    		<include name="**/goldenGateServer/dss/client/*.java" />
+    		<include name="**/goldenGateServer/dss/data/*.java" />
+	        <classpath refid="compile.classpath" />
+	    </javac>
+	</target>
+	
+	<!-- Compile GoldenGATE Editor client plugins if GoldenGATE.jar available -->
+	<target name="check-gg" unless="gg.exists">
+		<available property="gg.exists" file="../goldengate-editor/dist/GoldenGATE.jar"/>
+	</target>
+	<target name="compileGge" depends="check-gg" if="${gg.exists}" description="Compile GoldenGATE Editor plugin Java sources">
+		
+	    <!-- Compile Java classes as necessary -->
+	    <javac destdir="${build.home}/classes" includeantruntime="false" target="1.5" debug="true" debuglevel="lines,vars,source">
+	    	<src path="${src.home}" />
+    		<include name="**/goldenGate/docStyles/util/*.java" />
+    		<include name="**/goldenGate/docStyles/plugins/*.java" />
+    		<include name="**/goldenGate/docStyles/plugins/editor/*.java" />
+	        <classpath refid="compile.classpath" />
+	    </javac>
+	</target>
+	
+	<!-- Compile GoldenGATE Editor client plugins if GoldenGATE.jar available -->
+	<target name="check-ggi" unless="ggi.exists">
+		<available property="ggi.exists" file="../goldengate-imagine/dist/GgImagine.jar"/>
+	</target>
+	<target name="compileGgi" depends="check-ggi" if="${ggi.exists}" description="Compile GoldenGATE Imagine plugin Java sources">
+		
+	    <!-- Compile Java classes as necessary -->
+	    <javac destdir="${build.home}/classes" includeantruntime="false" target="1.5" debug="true" debuglevel="lines,vars,source">
+	    	<src path="${src.home}" />
+    		<include name="**/goldenGate/docStyles/util/*.java" />
+    		<include name="**/goldenGate/docStyles/plugins/*.java" />
+    		<include name="**/goldenGate/docStyles/plugins/imagine/*.java" />
+	        <classpath refid="compile.classpath" />
+	    </javac>
+	</target>
+	
+	<!-- Compile web frontend and modules -->
+	<target name="compileWeb" description="Compile GoldenGATE Server web front-end Java sources">
+		
+	    <!-- Compile Java classes as necessary -->
+	    <javac destdir="${build.home}/classes" includeantruntime="false" target="1.5" debug="true" debuglevel="lines,vars,source">
+	    	<src path="${src.home}" />
+    		<include name="**/goldenGateServer/dss/client/GoldenGateDocumentStyleServlet.java" />
+	        <classpath refid="compile.classpath" />
+	    </javac>
+	</target>
+</project>
