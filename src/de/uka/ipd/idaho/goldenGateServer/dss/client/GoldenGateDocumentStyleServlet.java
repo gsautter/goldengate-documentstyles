@@ -76,7 +76,8 @@ public class GoldenGateDocumentStyleServlet extends GgServerClientServlet implem
 		//	get configuration data location
 		String configDataLocation = this.getSetting("docStyleDataLocation");
 		if (configDataLocation == null)
-			this.docStyleDataRoot = new File(new File(this.webInfFolder, "caches"), "DocumentStyles");
+//			this.docStyleDataRoot = new File(new File(this.webInfFolder, "caches"), "DocumentStyles");
+			this.docStyleDataRoot = new File(this.cacheRootFolder, "DocumentStyles");
 		else this.docStyleDataRoot = new File(configDataLocation);
 	}
 	

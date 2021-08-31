@@ -27,12 +27,12 @@
 		<delete file="${jar.dss.client}" />
 		<jar destfile="${jar.dss.client}" manifest="${file.home}/MANIFEST.components.MF">
 			<fileset dir="${build.home}/classes">
-				<include name="**/goldenGateServer/dss/GoldenGateDcsConstants*.class" />
+				<include name="**/goldenGateServer/dss/GoldenGateDssConstants*.class" />
 				<include name="**/goldenGateServer/dss/client/GoldenGateDocumentStyleServlet*.class" />
 				<include name="**/goldenGateServer/dss/data/DssDocumentStyleList*.class" />
 			</fileset>
 			<fileset dir="${src.home}">
-				<include name="**/goldenGateServer/dss/GoldenGateDcsConstants.java" />
+				<include name="**/goldenGateServer/dss/GoldenGateDssConstants.java" />
 				<include name="**/goldenGateServer/dss/client/GoldenGateDocumentStyleServlet.java" />
 				<include name="**/goldenGateServer/dss/data/DssDocumentStyleList.java" />
 			</fileset>

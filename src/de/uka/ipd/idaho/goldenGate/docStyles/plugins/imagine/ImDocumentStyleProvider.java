@@ -38,10 +38,15 @@ import java.util.TreeSet;
 import de.uka.ipd.idaho.easyIO.settings.Settings;
 import de.uka.ipd.idaho.gamta.util.DocumentStyle;
 import de.uka.ipd.idaho.gamta.util.DocumentStyle.Data;
+import de.uka.ipd.idaho.gamta.util.ProgressMonitor;
 import de.uka.ipd.idaho.goldenGate.docStyles.plugins.AbstractDocumentStyleProvider;
 import de.uka.ipd.idaho.goldenGate.plugins.GoldenGatePlugin;
+import de.uka.ipd.idaho.im.ImAnnotation;
+import de.uka.ipd.idaho.im.ImDocument;
 import de.uka.ipd.idaho.im.imagine.GoldenGateImagine;
-import de.uka.ipd.idaho.im.imagine.plugins.GoldenGateImaginePlugin;
+import de.uka.ipd.idaho.im.imagine.plugins.ImageMarkupToolProvider;
+import de.uka.ipd.idaho.im.util.ImDocumentMarkupPanel;
+import de.uka.ipd.idaho.im.util.ImDocumentMarkupPanel.ImageMarkupTool;
 import de.uka.ipd.idaho.im.util.ImDocumentStyle;
 
 /**
@@ -50,7 +55,9 @@ import de.uka.ipd.idaho.im.util.ImDocumentStyle;
  * 
  * @author sautter
  */
-public class ImDocumentStyleProvider extends AbstractDocumentStyleProvider implements GoldenGateImaginePlugin {
+public class ImDocumentStyleProvider extends AbstractDocumentStyleProvider implements ImageMarkupToolProvider {
+	private static final String DOCUMENT_STYLE_DOUBLE_CHECKER_IMT_NAME = "DocumentStyleDoubleChecker";
+	private DocumentStyleDoubleChecker docStyleDoubleChecker = new DocumentStyleDoubleChecker();
 	private Map docStylesById = Collections.synchronizedMap(new HashMap());
 	private Map liveDocStyleDataById = Collections.synchronizedMap(new HashMap());
 	
@@ -82,6 +89,84 @@ public class ImDocumentStyleProvider extends AbstractDocumentStyleProvider imple
 		for (int p = 0; p < dsps.length; p++) {
 			if (dsps[p] != this)
 				DocumentStyle.removeProvider((AbstractDocumentStyleProvider) dsps[p]);
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see de.uka.ipd.idaho.im.imagine.plugins.ImageMarkupToolProvider#getEditMenuItemNames()
+	 */
+	public String[] getEditMenuItemNames() {
+		return null;
+	}
+	
+	/* (non-Javadoc)
+	 * @see de.uka.ipd.idaho.im.imagine.plugins.ImageMarkupToolProvider#getToolsMenuItemNames()
+	 */
+	public String[] getToolsMenuItemNames() {
+		String[] tmins = {DOCUMENT_STYLE_DOUBLE_CHECKER_IMT_NAME};
+		return tmins;
+	}
+	
+	/* (non-Javadoc)
+	 * @see de.uka.ipd.idaho.im.imagine.plugins.ImageMarkupToolProvider#getImageMarkupTool(java.lang.String)
+	 */
+	public ImageMarkupTool getImageMarkupTool(String name) {
+		if (DOCUMENT_STYLE_DOUBLE_CHECKER_IMT_NAME.equals(name))
+			return this.docStyleDoubleChecker;
+		else return null;
+	}
+	
+	private static class DocumentStyleDoubleChecker implements ImageMarkupTool {
+		public String getLabel() {
+			return "Double-Check Document Style";
+		}
+		public String getTooltip() {
+			return "Double-check whether or not the document style template assigned to a document is the best matching one";
+		}
+		public String getHelpText() {
+			return null; // for now
+		}
+		public void process(ImDocument doc, ImAnnotation annot, ImDocumentMarkupPanel idmp, ProgressMonitor pm) {
+			
+			//	full document only
+			if (annot != null)
+				return;
+			
+			//	get existing assignment
+			pm.setStep("Getting old document style assignment");
+			String docStyleName = ((String) doc.removeAttribute(DocumentStyle.DOCUMENT_STYLE_NAME_ATTRIBUTE));
+			String docStyleId = ((String) doc.removeAttribute(DocumentStyle.DOCUMENT_STYLE_ID_ATTRIBUTE));
+			String docStyleVersion = ((String) doc.removeAttribute(DocumentStyle.DOCUMENT_STYLE_VERSION_ATTRIBUTE));
+			Object docStyle = doc.removeAttribute(DocumentStyle.DOCUMENT_STYLE_ATTRIBUTE); // need to be safe with object, might have been loaded as string
+			
+			//	try and assign new style
+			pm.setStep("Re-selecting document style");
+			ImDocumentStyle nDocStyle = ImDocumentStyle.getStyleFor(doc);
+			
+			//	no match, might have been assigned manually ...
+			if (nDocStyle == null) {
+				doc.setAttribute(DocumentStyle.DOCUMENT_STYLE_NAME_ATTRIBUTE, docStyleName);
+				doc.setAttribute(DocumentStyle.DOCUMENT_STYLE_ID_ATTRIBUTE, docStyleId);
+				doc.setAttribute(DocumentStyle.DOCUMENT_STYLE_VERSION_ATTRIBUTE, docStyleVersion);
+				doc.setAttribute(DocumentStyle.DOCUMENT_STYLE_ATTRIBUTE, docStyle);
+				pm.setInfo("Matching document style not found, reverted to '" + docStyleId + ":" + docStyleName + "'");
+				return;
+			}
+			
+			//	get new assignments
+			String nDocStyleName = ((String) doc.getAttribute(DocumentStyle.DOCUMENT_STYLE_NAME_ATTRIBUTE));
+			String nDocStyleId = ((String) doc.getAttribute(DocumentStyle.DOCUMENT_STYLE_ID_ATTRIBUTE));
+			String nDocStyleVersion = ((String) doc.getAttribute(DocumentStyle.DOCUMENT_STYLE_VERSION_ATTRIBUTE));
+			
+			//	compare and output summary
+			boolean nameMatch = ((nDocStyleName == null) ? (docStyleName == null) : nDocStyleName.equals(docStyleName));
+			boolean idMatch = ((nDocStyleId == null) ? (docStyleId == null) : nDocStyleId.equals(docStyleId));
+			boolean versionMatch = ((nDocStyleVersion == null) ? (docStyleVersion == null) : nDocStyleVersion.equals(docStyleVersion));
+			if (nameMatch && idMatch && versionMatch)
+				pm.setInfo("Retained document style '" + docStyleId + ":" + docStyleName + "'");
+			else if (nameMatch && idMatch)
+				pm.setInfo("Retained document style '" + docStyleId + ":" + docStyleName + "', switched to version " + nDocStyleVersion);
+			else pm.setInfo("Switched to document style '" + nDocStyleId + ":" + nDocStyleName + "' version " + nDocStyleVersion);
 		}
 	}
 	
@@ -170,11 +255,11 @@ public class ImDocumentStyleProvider extends AbstractDocumentStyleProvider imple
 				if (data == null)
 					data = "0";
 			}
-			else if (key.startsWith(Anchor.ANCHOR_PREFIX + ".") && key.endsWith("." + PageFeatureAnchor.MAXIMUM_PAGES_AFTER_FIRST_PROPERTY)) {
-				data = this.getPropertyData(Anchor.ANCHOR_PREFIX + "." + PageFeatureAnchor.MAXIMUM_PAGES_AFTER_FIRST_PROPERTY);
-				if (data == null)
-					data = "0";
-			}
+//			else if (key.startsWith(Anchor.ANCHOR_PREFIX + ".") && key.endsWith("." + PageFeatureAnchor.MAXIMUM_PAGES_AFTER_FIRST_PROPERTY)) {
+//				data = this.getPropertyData(Anchor.ANCHOR_PREFIX + "." + PageFeatureAnchor.MAXIMUM_PAGES_AFTER_FIRST_PROPERTY);
+//				if (data == null)
+//					data = "0";
+//			}
 			return data;
 		}
 	}
